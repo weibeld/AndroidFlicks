@@ -14,6 +14,7 @@ public interface ApiService {
     // Note: the base URL MUST end with a slash and the API calls MUST NOT start with a slash
     String BASE_URL = "https://api.themoviedb.org/3/";
     String NOW_PLAYING = "movie/now_playing";
+    String BASE_URL_IMG = "https://image.tmdb.org/t/p/w185";
 
     @GET(NOW_PLAYING)
     Call<ApiResponseMovieList> apiGetNowPlaying();

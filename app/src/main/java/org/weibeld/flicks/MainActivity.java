@@ -12,9 +12,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -146,11 +148,21 @@ public class MainActivity extends AppCompatActivity {
         public View getView(int position, View convertView, ViewGroup parent) {
             Movie movie = getItem(position);
             if (convertView == null) {
-                convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_movie, parent, false);
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_movie_portrait, parent, false);
             }
 
+            // TODO: apply ViewHolder pattern
             TextView tvTitle = (TextView) convertView.findViewById(R.id.tvTitle);
+            TextView tvOverview = (TextView) convertView.findViewById(R.id.tvOverview);
+            ImageView ivPoster = (ImageView) convertView.findViewById(R.id.ivPoster);
+
+            if (movie.posterPath != null) {
+                Glide.with(mActivity)
+                        .load(ApiService.BASE_URL_IMG + movie.posterPath)
+                        .into(ivPoster);
+            }
             tvTitle.setText(movie.title);
+            tvOverview.setText(movie.overview);
 
             return convertView;
         }
