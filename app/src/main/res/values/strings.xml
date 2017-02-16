@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Flicks</string>
+    <string name="menu_item_dummy">Dummy Menu Item</string>
 </resources>

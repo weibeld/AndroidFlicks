@@ -4,6 +4,7 @@
 
 Time spent: **:smiley:** hours spent in total
 
+
 ## User Stories
 
 The following **required** functionality is completed:
@@ -35,6 +36,7 @@ The following **additional** features are implemented:
 
 * [ ] List anything else that you can get done to improve the app functionality!
 
+
 ## Video Walkthrough
 
 Here's a walkthrough of implemented user stories:
@@ -43,14 +45,25 @@ Here's a walkthrough of implemented user stories:
 
 GIF created with [LiceCap](http://www.cockos.com/licecap/).
 
+
 ## Notes
 
 Describe any challenges encountered while building the app.
 
-## Open-source libraries used
+
+## Official Android libraries used
+
+- [Data Binding Library](https://developer.android.com/topic/libraries/data-binding/index.html) - Easier binding of XML layouts to application logic
+
+
+## Open-source third-party libraries used
+
+- [Glide](https://github.com/bumptech/glide) - Image loading and caching library (alternative to [Picasso](http://square.github.io/picasso/))
+- [Retrofit](https://square.github.io/retrofit/) - HTTP client (alternative to [android-async-http](http://loopj.com/android-async-http/))
 
 - [Android Async HTTP](https://github.com/loopj/android-async-http) - Simple asynchronous HTTP requests with JSON parsing
 - [Picasso](http://square.github.io/picasso/) - Image loading and caching library for Android
+
 
 ## License
 
