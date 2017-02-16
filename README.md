@@ -61,8 +61,8 @@ Describe any challenges encountered while building the app.
 - [Glide](https://github.com/bumptech/glide) - Image loading and caching library (alternative to [Picasso](http://square.github.io/picasso/))
 - [Retrofit](https://square.github.io/retrofit/) - HTTP client (alternative to [android-async-http](http://loopj.com/android-async-http/))
 
-- [Android Async HTTP](https://github.com/loopj/android-async-http) - Simple asynchronous HTTP requests with JSON parsing
-- [Picasso](http://square.github.io/picasso/) - Image loading and caching library for Android
+<!--- - [Android Async HTTP](https://github.com/loopj/android-async-http) - Simple asynchronous HTTP requests with JSON parsing --->
+<!--- - [Picasso](http://square.github.io/picasso/) - Image loading and caching library for Android --->
 
 
 ## License
