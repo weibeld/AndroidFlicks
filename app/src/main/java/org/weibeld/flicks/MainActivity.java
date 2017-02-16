@@ -1,17 +1,30 @@
 package org.weibeld.flicks;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import org.weibeld.flicks.api.ApiResponseMovieList;
+import org.weibeld.flicks.api.ApiService;
+
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
@@ -23,13 +36,17 @@ import retrofit2.Callback;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+import static org.weibeld.flicks.api.ApiResponseMovieList.Movie;
+
 public class MainActivity extends AppCompatActivity {
 
     private final String LOG_TAG = MainActivity.class.getSimpleName();
 
     MainActivity mActivity;
-    MovieList mMovieList;
     Retrofit mRetrofit;
+    ListView mListView;
+    ArrayAdapter<Movie> mAdapter;
+    List<Movie> mMovies = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,37 +58,10 @@ public class MainActivity extends AppCompatActivity {
 
         // Initialise member variables
         mActivity = this;
-
-        // Set up Retrofit
-        Gson myGson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
-        Interceptor myInterceptor = new Interceptor() {
-            @Override
-            public Response intercept(Chain chain) throws IOException {
-                Request request = chain.request();
-                HttpUrl url = request.url().newBuilder().addQueryParameter("api_key", mActivity.getString(R.string.tmdb_api_key)).build();
-                request = request.newBuilder().url(url).build();
-                return chain.proceed(request);
-            }
-        };
-//        OkHttpClient client = new OkHttpClient();
-//        client.interceptors().add(myInterceptor);
-
-        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(new Interceptor() {
-            @Override
-            public Response intercept(Chain chain) throws IOException {
-                Request request = chain.request();
-                HttpUrl url = request.url().newBuilder().addQueryParameter("api_key", mActivity.getString(R.string.tmdb_api_key)).build();
-                request = request.newBuilder().url(url).build();
-                return chain.proceed(request);
-            }
-        }).build();
-
-
-        mRetrofit = new Retrofit.Builder()
-                .baseUrl(getString(R.string.api_base_url))
-                .client(client)
-                .addConverterFactory(GsonConverterFactory.create(myGson))
-                .build();
+        mRetrofit = setupRetrofit();
+        mListView = (ListView) findViewById(R.id.lvMovies);
+        mAdapter = new MovieAdapter(this, (ArrayList<Movie>) mMovies);
+        mListView.setAdapter(mAdapter);
     }
 
 
@@ -84,24 +74,85 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.dummy:
-                TmdbApiInterface apiService = mRetrofit.create(TmdbApiInterface.class);
-                Call<MovieList> call = apiService.getCurrentMovies();
-                call.enqueue(new Callback<MovieList>() {
-                    @Override
-                    public void onResponse(Call<MovieList> call, retrofit2.Response<MovieList> response) {
-                        int statusCode = response.code();
-                        MovieList mMovieList = response.body();
-                        Log.v(LOG_TAG, mMovieList.getTitles());
-                    }
-
-                    @Override
-                    public void onFailure(Call<MovieList> call, Throwable t) {
-                        // Log error here since request failed
-                    }
-                });
+            case R.id.action_refresh:
+                mAdapter.clear();
+                getNowPlaying();
                 return true;
         }
         return false;
+    }
+
+    private void getNowPlaying() {
+        ApiService api = mRetrofit.create(ApiService.class);
+        Call<ApiResponseMovieList> call = api.apiGetNowPlaying();
+        call.enqueue(new Callback<ApiResponseMovieList>() {
+            @Override
+            public void onResponse(Call<ApiResponseMovieList> call, retrofit2.Response<ApiResponseMovieList> response) {
+                int statusCode = response.code();
+                ApiResponseMovieList body = response.body();
+                Log.v(LOG_TAG, "page: " + body.page);
+                Log.v(LOG_TAG, "total pages: " + body.totalPages);
+                Log.v(LOG_TAG, "total results: " + body.totalResults);
+                Log.v(LOG_TAG, "dates from " + body.dates.minimum + " to " + body.dates.maximum);
+                List<Movie> movies = body.results;
+                for (Movie movie : movies) {
+                    Log.v(LOG_TAG, movie.title);
+                }
+                mAdapter.addAll(movies);
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponseMovieList> call, Throwable t) {
+                t.printStackTrace();
+            }
+        });
+    }
+
+    private Retrofit setupRetrofit() {
+        // Customise Gson instance
+        Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
+
+        // Customise OkHttpClient (add interceptor to append api_key parameter to every query)
+        OkHttpClient okHttpClient = new OkHttpClient.Builder().addInterceptor(new Interceptor() {
+            @Override
+            public Response intercept(Chain chain) throws IOException {
+                // Append api_key parameter to every query
+                Request request = chain.request();
+                HttpUrl url = request.url().newBuilder().addQueryParameter("api_key", ApiService.API_KEY).build();
+                request = request.newBuilder().url(url).build();
+                return chain.proceed(request);
+            }
+        }).build();
+
+        // Create Retrofit instance
+        return new Retrofit.Builder()
+                .baseUrl(ApiService.BASE_URL)
+                .client(okHttpClient)
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .build();
+    }
+
+
+    public class MovieAdapter extends ArrayAdapter<Movie> {
+
+        private final String LOG_TAG = MovieAdapter.class.getSimpleName();
+
+        public MovieAdapter(Context context, ArrayList<Movie> items) {
+            super(context, 0, items);
+        }
+
+        @NonNull
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            Movie movie = getItem(position);
+            if (convertView == null) {
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_movie, parent, false);
+            }
+
+            TextView tvTitle = (TextView) convertView.findViewById(R.id.tvTitle);
+            tvTitle.setText(movie.title);
+
+            return convertView;
+        }
     }
 }
