@@ -38,6 +38,7 @@ import retrofit2.Callback;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+import static org.weibeld.flicks.R.id.ivPoster;
 import static org.weibeld.flicks.api.ApiResponseMovieList.Movie;
 
 public class MainActivity extends AppCompatActivity {
@@ -147,24 +148,42 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             Movie movie = getItem(position);
+            ViewHolder viewHolder;
+
             if (convertView == null) {
                 convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_movie_portrait, parent, false);
+                viewHolder = createNewViewHolder(convertView);
+                convertView.setTag(viewHolder);
+            }
+            else {
+                viewHolder = (ViewHolder) convertView.getTag();
             }
 
-            // TODO: apply ViewHolder pattern
-            TextView tvTitle = (TextView) convertView.findViewById(R.id.tvTitle);
-            TextView tvOverview = (TextView) convertView.findViewById(R.id.tvOverview);
-            ImageView ivPoster = (ImageView) convertView.findViewById(R.id.ivPoster);
-
+            viewHolder.tvTitle.setText(movie.title);
+            viewHolder.tvOverview.setText(movie.overview);
+            String imageUri;
             if (movie.posterPath != null) {
-                Glide.with(mActivity)
-                        .load(ApiService.BASE_URL_IMG + movie.posterPath)
-                        .into(ivPoster);
+                imageUri = ApiService.BASE_URL_IMG + ApiService.POSTER_SIZE_W154 + movie.posterPath;
+                Glide.with(mActivity).load(imageUri).placeholder(getDrawable(R.drawable.placeholder_w154)).into(viewHolder.ivPoster);
             }
-            tvTitle.setText(movie.title);
-            tvOverview.setText(movie.overview);
+            else
+                Glide.with(mActivity).load(getDrawable(R.drawable.no_poster_w154)).into(viewHolder.ivPoster);
 
             return convertView;
+        }
+
+        private ViewHolder createNewViewHolder(View convertView) {
+            ViewHolder viewHolder = new ViewHolder();
+            viewHolder.tvTitle = (TextView) convertView.findViewById(R.id.tvTitle);
+            viewHolder.tvOverview = (TextView) convertView.findViewById(R.id.tvOverview);
+            viewHolder.ivPoster = (ImageView) convertView.findViewById(ivPoster);
+            return viewHolder;
+        }
+
+        private class ViewHolder {
+            TextView tvTitle;
+            TextView tvOverview;
+            ImageView ivPoster;
         }
     }
 }
