@@ -1,6 +1,7 @@
 package org.weibeld.flicks;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -38,6 +39,7 @@ import retrofit2.Callback;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+import static org.weibeld.flicks.R.id.ivBackdrop;
 import static org.weibeld.flicks.R.id.ivPoster;
 import static org.weibeld.flicks.api.ApiResponseMovieList.Movie;
 
@@ -49,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
     Retrofit mRetrofit;
     ListView mListView;
     ArrayAdapter<Movie> mAdapter;
-    List<Movie> mMovies = new ArrayList<>();
+    List<Movie> mMovies;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,8 +65,16 @@ public class MainActivity extends AppCompatActivity {
         mActivity = this;
         mRetrofit = setupRetrofit();
         mListView = (ListView) findViewById(R.id.lvMovies);
-        mAdapter = new MovieAdapter(this, (ArrayList<Movie>) mMovies);
+        mMovies = new ArrayList<>();
+
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            mAdapter = new MovieAdapterLandscape(this, (ArrayList<Movie>) mMovies);
+        }
+        else {
+            mAdapter = new MovieAdapterPortrait(this, (ArrayList<Movie>) mMovies);
+        }
         mListView.setAdapter(mAdapter);
+        getNowPlaying();
     }
 
 
@@ -136,11 +146,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public class MovieAdapter extends ArrayAdapter<Movie> {
+    public class MovieAdapterPortrait extends ArrayAdapter<Movie> {
 
-        private final String LOG_TAG = MovieAdapter.class.getSimpleName();
+        private final String LOG_TAG = MovieAdapterPortrait.class.getSimpleName();
 
-        public MovieAdapter(Context context, ArrayList<Movie> items) {
+        public MovieAdapterPortrait(Context context, ArrayList<Movie> items) {
             super(context, 0, items);
         }
 
@@ -161,13 +171,16 @@ public class MainActivity extends AppCompatActivity {
 
             viewHolder.tvTitle.setText(movie.title);
             viewHolder.tvOverview.setText(movie.overview);
-            String imageUri;
             if (movie.posterPath != null) {
-                imageUri = ApiService.BASE_URL_IMG + ApiService.POSTER_SIZE_W154 + movie.posterPath;
-                Glide.with(mActivity).load(imageUri).placeholder(getDrawable(R.drawable.placeholder_w154)).into(viewHolder.ivPoster);
+                Glide.with(mActivity)
+                        .load(ApiService.BASE_URL_IMG + ApiService.POSTER_SIZE_W154 + movie.posterPath)
+                        .placeholder(getDrawable(R.drawable.poster_placeholder_154x231))
+                        .into(viewHolder.ivPoster);
             }
             else
-                Glide.with(mActivity).load(getDrawable(R.drawable.no_poster_w154)).into(viewHolder.ivPoster);
+                Glide.with(mActivity)
+                        .load(getDrawable(R.drawable.poster_none_154x231))
+                        .into(viewHolder.ivPoster);
 
             return convertView;
         }
@@ -184,6 +197,61 @@ public class MainActivity extends AppCompatActivity {
             TextView tvTitle;
             TextView tvOverview;
             ImageView ivPoster;
+        }
+    }
+
+
+    public class MovieAdapterLandscape extends ArrayAdapter<Movie> {
+
+        private final String LOG_TAG = MovieAdapterPortrait.class.getSimpleName();
+
+        public MovieAdapterLandscape(Context context, ArrayList<Movie> items) {
+            super(context, 0, items);
+        }
+
+        @NonNull
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            Movie movie = getItem(position);
+            ViewHolder viewHolder;
+
+            if (convertView == null) {
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_movie_landscape, parent, false);
+                viewHolder = createNewViewHolder(convertView);
+                convertView.setTag(viewHolder);
+            }
+            else {
+                viewHolder = (ViewHolder) convertView.getTag();
+            }
+
+            viewHolder.tvTitle.setText(movie.title);
+            viewHolder.tvOverview.setText(movie.overview);
+            if (movie.posterPath != null) {
+                Glide.with(mActivity)
+                        .load(ApiService.BASE_URL_IMG + ApiService.BACKDROP_SIZE_W300 + movie.backdropPath)
+                        .placeholder(getDrawable(R.drawable.backdrop_placeholder_300x169))
+                        .into(viewHolder.ivBackdrop);
+            }
+            else
+                Glide.with(mActivity)
+                        .load(getDrawable(R.drawable.backdrop_none_300x169))
+                        .into(viewHolder.ivBackdrop);
+
+            return convertView;
+        }
+
+        private ViewHolder createNewViewHolder(View convertView) {
+            ViewHolder viewHolder = new ViewHolder();
+            viewHolder.tvTitle = (TextView) convertView.findViewById(R.id.tvTitle);
+            viewHolder.tvOverview = (TextView) convertView.findViewById(R.id.tvOverview);
+            viewHolder.ivBackdrop = (ImageView) convertView.findViewById(ivBackdrop);
+            return viewHolder;
+        }
+
+        private class ViewHolder {
+            TextView tvTitle;
+            TextView tvOverview;
+            ImageView ivBackdrop;
         }
     }
 }
