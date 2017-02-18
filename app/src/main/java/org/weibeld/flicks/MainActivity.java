@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -52,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
     ListView mListView;
     ArrayAdapter<Movie> mAdapter;
     List<Movie> mMovies;
+    SwipeRefreshLayout mSwipeRefresh;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +76,27 @@ public class MainActivity extends AppCompatActivity {
             mAdapter = new MovieAdapterPortrait(this, (ArrayList<Movie>) mMovies);
         }
         mListView.setAdapter(mAdapter);
+
+        mSwipeRefresh = (SwipeRefreshLayout) findViewById(R.id.swipeRefresh);
+        // Setup refresh listener which triggers new data loading
+        mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                // Your code to refresh the list here.
+                // Make sure you call swipeContainer.setRefreshing(false)
+                // once the network request has completed successfully.
+                mAdapter.clear();
+                getNowPlaying();
+            }
+        });
+        // Configure the refreshing colors
+        mSwipeRefresh.setColorSchemeResources(android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light);
+
+
+
         getNowPlaying();
     }
 
@@ -87,9 +110,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_refresh:
-                mAdapter.clear();
-                getNowPlaying();
+            case R.id.action_dummy:
                 return true;
         }
         return false;
@@ -112,6 +133,7 @@ public class MainActivity extends AppCompatActivity {
                     Log.v(LOG_TAG, movie.title);
                 }
                 mAdapter.addAll(movies);
+                mSwipeRefresh.setRefreshing(false);  // Remove the spinning referesh item
             }
 
             @Override
@@ -161,7 +183,7 @@ public class MainActivity extends AppCompatActivity {
             ViewHolder viewHolder;
 
             if (convertView == null) {
-                convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_movie_portrait, parent, false);
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_movie, parent, false);
                 viewHolder = createNewViewHolder(convertView);
                 convertView.setTag(viewHolder);
             }
@@ -216,7 +238,7 @@ public class MainActivity extends AppCompatActivity {
             ViewHolder viewHolder;
 
             if (convertView == null) {
-                convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_movie_landscape, parent, false);
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_movie, parent, false);
                 viewHolder = createNewViewHolder(convertView);
                 convertView.setTag(viewHolder);
             }

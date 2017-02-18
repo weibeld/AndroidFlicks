@@ -1,4 +1,4 @@
 <resources>
     <string name="app_name">Flicks</string>
-    <string name="action_refresh">Refreshm</string>
+    <string name="action_dummy">Dummy</string>
 </resources>
