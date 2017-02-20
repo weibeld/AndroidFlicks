@@ -2,11 +2,11 @@ package org.weibeld.flicks;
 
 import android.content.Context;
 import android.content.Intent;
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -15,12 +15,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import org.weibeld.flicks.api.ApiResponseMovieList;
 import org.weibeld.flicks.api.ApiService;
+import org.weibeld.flicks.databinding.ActivityMainBinding;
+import org.weibeld.flicks.databinding.ItemMovieBinding;
 import org.weibeld.flicks.util.Util;
 
 import java.util.ArrayList;
@@ -42,19 +42,18 @@ public class MainActivity extends AppCompatActivity {
     ArrayAdapter<Movie> mAdapter;
     List<Movie> mMovies;
     SwipeRefreshLayout mSwipeRefresh;
+    ActivityMainBinding b;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        b = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        setSupportActionBar(b.toolbar);
 
         // Initialise member variables
         mActivity = this;
         mRetrofit = Util.setupRetrofit();
-        mListView = (ListView) findViewById(R.id.lvMovies);
+        mListView = b.lvMovies;
         mMovies = new ArrayList<>();
         mAdapter = new MovieAdapter(this, (ArrayList<Movie>) mMovies);
         mListView.setAdapter(mAdapter);
@@ -131,6 +130,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+
     public class MovieAdapter extends ArrayAdapter<Movie> {
 
         private final String LOG_TAG = MovieAdapter.class.getSimpleName();
@@ -143,39 +143,24 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             Movie movie = getItem(position);
-            ViewHolder viewHolder;
+            ItemMovieBinding binding;
 
             if (convertView == null) {
-                convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_movie, parent, false);
-                viewHolder = createNewViewHolder(convertView);
-                convertView.setTag(viewHolder);
+                binding = DataBindingUtil.inflate(LayoutInflater.from(getContext()), R.layout.item_movie, parent, false);
+                convertView = binding.getRoot();
+                convertView.setTag(binding);
             }
-            else {
-                viewHolder = (ViewHolder) convertView.getTag();
-            }
-
-            viewHolder.tvTitle.setText(movie.title);
-            viewHolder.tvOverview.setText(movie.overview);
-            if (Util.isPortrait(mActivity))
-                Util.loadImage(mActivity, Util.TYPE_POSTER, ApiService.POSTER_SIZE_W185, movie.posterPath, viewHolder.ivImage);
             else
-                Util.loadImage(mActivity, Util.TYPE_BACKDROP, ApiService.BACKDROP_SIZE_W780, movie.backdropPath, viewHolder.ivImage);
+                binding = (ItemMovieBinding) convertView.getTag();
+
+            binding.tvTitle.setText(movie.title);
+            binding.tvOverview.setText(movie.overview);
+            if (Util.isPortrait(mActivity))
+                Util.loadImage(mActivity, Util.TYPE_POSTER, ApiService.POSTER_SIZE_W185, movie.posterPath, binding.ivImage);
+            else
+                Util.loadImage(mActivity, Util.TYPE_BACKDROP, ApiService.BACKDROP_SIZE_W780, movie.backdropPath, binding.ivImage);
 
             return convertView;
-        }
-
-        private ViewHolder createNewViewHolder(View convertView) {
-            ViewHolder viewHolder = new ViewHolder();
-            viewHolder.tvTitle = (TextView) convertView.findViewById(R.id.tvTitle);
-            viewHolder.tvOverview = (TextView) convertView.findViewById(R.id.tvOverview);
-            viewHolder.ivImage = (ImageView) convertView.findViewById(R.id.ivImage);
-            return viewHolder;
-        }
-
-        private class ViewHolder {
-            TextView tvTitle;
-            TextView tvOverview;
-            ImageView ivImage;
         }
     }
 }
