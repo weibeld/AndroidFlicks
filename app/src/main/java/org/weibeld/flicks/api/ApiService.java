@@ -2,6 +2,7 @@ package org.weibeld.flicks.api;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
+import retrofit2.http.Path;
 
 /**
  * Created by dw on 16/02/17.
@@ -13,7 +14,6 @@ public interface ApiService {
     String API_KEY = "a07e22bc18f5cb106bfe4cc1f83ad8ed";
     // Note: the base URL MUST end with a slash and the API calls MUST NOT start with a slash
     String BASE_URL = "https://api.themoviedb.org/3/";
-    String NOW_PLAYING = "movie/now_playing";
     // Image base URL and image sizes can be obtained through the /configuration  API call
     String BASE_URL_IMG = "https://image.tmdb.org/t/p/";
     // Poster size defines width of the poster in px, the W:H ratio is in many cases 2:3
@@ -28,7 +28,12 @@ public interface ApiService {
     String BACKDROP_SIZE_W780 = "w780";    // 780x439 (WxH) 16:9
     String BACKDROP_SIZE_W1280 = "w1280";  // 1280x720 (WxH) 16:9
 
-    @GET(NOW_PLAYING)
+    // Get the first page of the currently playing movies
+    @GET("movie/now_playing")
     Call<ApiResponseMovieList> apiGetNowPlaying();
+
+    // Get the list of trailers of a specific movie
+    @GET("movie/{id}/trailers")
+    Call<ApiResponseTrailersList> apiGetTrailers(@Path("id") int movieId);
 
 }

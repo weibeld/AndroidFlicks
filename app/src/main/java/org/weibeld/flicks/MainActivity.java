@@ -19,30 +19,17 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.google.gson.FieldNamingPolicy;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 import org.weibeld.flicks.api.ApiResponseMovieList;
 import org.weibeld.flicks.api.ApiService;
 import org.weibeld.flicks.util.Util;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import okhttp3.HttpUrl;
-import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
-import static org.weibeld.flicks.R.id.ivImage;
-import static org.weibeld.flicks.R.id.ivPoster;
 import static org.weibeld.flicks.api.ApiResponseMovieList.Movie;
 
 public class MainActivity extends AppCompatActivity {
@@ -66,18 +53,13 @@ public class MainActivity extends AppCompatActivity {
 
         // Initialise member variables
         mActivity = this;
-        mRetrofit = setupRetrofit();
+        mRetrofit = Util.setupRetrofit();
         mListView = (ListView) findViewById(R.id.lvMovies);
         mMovies = new ArrayList<>();
-
-        if (Util.isLandscape(mActivity)) {
-            mAdapter = new MovieAdapterLandscape(this, (ArrayList<Movie>) mMovies);
-        }
-        else {
-            mAdapter = new MovieAdapterPortrait(this, (ArrayList<Movie>) mMovies);
-        }
+        mAdapter = new MovieAdapter(this, (ArrayList<Movie>) mMovies);
         mListView.setAdapter(mAdapter);
 
+        // Set up "pull to refresh"
         mSwipeRefresh = (SwipeRefreshLayout) findViewById(R.id.swipeRefresh);
         // Setup refresh listener which triggers new data loading
         mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -107,8 +89,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-
         getNowPlaying();
     }
 
@@ -136,10 +116,6 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(Call<ApiResponseMovieList> call, retrofit2.Response<ApiResponseMovieList> response) {
                 int statusCode = response.code();
                 ApiResponseMovieList body = response.body();
-                Log.v(LOG_TAG, "page: " + body.page);
-                Log.v(LOG_TAG, "total pages: " + body.totalPages);
-                Log.v(LOG_TAG, "total results: " + body.totalResults);
-                Log.v(LOG_TAG, "dates from " + body.dates.minimum + " to " + body.dates.maximum);
                 List<Movie> movies = body.results;
                 for (Movie movie : movies) {
                     Log.v(LOG_TAG, movie.title);
@@ -155,36 +131,11 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private Retrofit setupRetrofit() {
-        // Customise Gson instance
-        Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
+    public class MovieAdapter extends ArrayAdapter<Movie> {
 
-        // Customise OkHttpClient (add interceptor to append api_key parameter to every query)
-        OkHttpClient okHttpClient = new OkHttpClient.Builder().addInterceptor(new Interceptor() {
-            @Override
-            public Response intercept(Chain chain) throws IOException {
-                // Append api_key parameter to every query
-                Request request = chain.request();
-                HttpUrl url = request.url().newBuilder().addQueryParameter("api_key", ApiService.API_KEY).build();
-                request = request.newBuilder().url(url).build();
-                return chain.proceed(request);
-            }
-        }).build();
+        private final String LOG_TAG = MovieAdapter.class.getSimpleName();
 
-        // Create Retrofit instance
-        return new Retrofit.Builder()
-                .baseUrl(ApiService.BASE_URL)
-                .client(okHttpClient)
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .build();
-    }
-
-
-    public class MovieAdapterPortrait extends ArrayAdapter<Movie> {
-
-        private final String LOG_TAG = MovieAdapterPortrait.class.getSimpleName();
-
-        public MovieAdapterPortrait(Context context, ArrayList<Movie> items) {
+        public MovieAdapter(Context context, ArrayList<Movie> items) {
             super(context, 0, items);
         }
 
@@ -205,52 +156,10 @@ public class MainActivity extends AppCompatActivity {
 
             viewHolder.tvTitle.setText(movie.title);
             viewHolder.tvOverview.setText(movie.overview);
-            Util.loadImage(mActivity, Util.TYPE_POSTER, ApiService.POSTER_SIZE_W185, movie.posterPath, viewHolder.ivPoster);
-            return convertView;
-        }
-
-        private ViewHolder createNewViewHolder(View convertView) {
-            ViewHolder viewHolder = new ViewHolder();
-            viewHolder.tvTitle = (TextView) convertView.findViewById(R.id.tvTitle);
-            viewHolder.tvOverview = (TextView) convertView.findViewById(R.id.tvOverview);
-            viewHolder.ivPoster = (ImageView) convertView.findViewById(ivPoster);
-            return viewHolder;
-        }
-
-        private class ViewHolder {
-            TextView tvTitle;
-            TextView tvOverview;
-            ImageView ivPoster;
-        }
-    }
-
-
-    public class MovieAdapterLandscape extends ArrayAdapter<Movie> {
-
-        private final String LOG_TAG = MovieAdapterPortrait.class.getSimpleName();
-
-        public MovieAdapterLandscape(Context context, ArrayList<Movie> items) {
-            super(context, 0, items);
-        }
-
-        @NonNull
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            Movie movie = getItem(position);
-            ViewHolder viewHolder;
-
-            if (convertView == null) {
-                convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_movie, parent, false);
-                viewHolder = createNewViewHolder(convertView);
-                convertView.setTag(viewHolder);
-            }
-            else {
-                viewHolder = (ViewHolder) convertView.getTag();
-            }
-
-            viewHolder.tvTitle.setText(movie.title);
-            viewHolder.tvOverview.setText(movie.overview);
-            Util.loadImage(mActivity, Util.TYPE_BACKDROP, ApiService.BACKDROP_SIZE_W780, movie.backdropPath, viewHolder.ivBackdrop);
+            if (Util.isPortrait(mActivity))
+                Util.loadImage(mActivity, Util.TYPE_POSTER, ApiService.POSTER_SIZE_W185, movie.posterPath, viewHolder.ivImage);
+            else
+                Util.loadImage(mActivity, Util.TYPE_BACKDROP, ApiService.BACKDROP_SIZE_W780, movie.backdropPath, viewHolder.ivImage);
 
             return convertView;
         }
@@ -259,14 +168,14 @@ public class MainActivity extends AppCompatActivity {
             ViewHolder viewHolder = new ViewHolder();
             viewHolder.tvTitle = (TextView) convertView.findViewById(R.id.tvTitle);
             viewHolder.tvOverview = (TextView) convertView.findViewById(R.id.tvOverview);
-            viewHolder.ivBackdrop = (ImageView) convertView.findViewById(ivImage);
+            viewHolder.ivImage = (ImageView) convertView.findViewById(R.id.ivImage);
             return viewHolder;
         }
 
         private class ViewHolder {
             TextView tvTitle;
             TextView tvOverview;
-            ImageView ivBackdrop;
+            ImageView ivImage;
         }
     }
 }

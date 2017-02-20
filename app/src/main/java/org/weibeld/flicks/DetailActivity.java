@@ -1,16 +1,32 @@
 package org.weibeld.flicks;
 
+import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
+import org.weibeld.flicks.api.ApiResponseTrailersList;
 import org.weibeld.flicks.api.ApiService;
 import org.weibeld.flicks.databinding.ActivityDetailBinding;
+import org.weibeld.flicks.databinding.ItemTrailerBinding;
 import org.weibeld.flicks.util.Util;
 
+import java.util.ArrayList;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Retrofit;
+
 import static org.weibeld.flicks.api.ApiResponseMovieList.Movie;
+import static org.weibeld.flicks.api.ApiResponseTrailersList.YoutubeTrailer;
 
 /**
  * Created by dw on 20/02/17.
@@ -20,9 +36,15 @@ public class DetailActivity extends AppCompatActivity {
 
     private final String LOG_TAG = DetailActivity.class.getSimpleName();
 
+    private static final String YOUTUBE_BASE_URL = "https://www.youtube.com/watch?v=";
+
     ActivityDetailBinding b;
     DetailActivity mActivity;
     Movie mMovie;
+    Retrofit mRetrofit;
+    ArrayList<YoutubeTrailer> mTrailers;
+    ListView mTrailersList;
+    TrailerAdapter mAdapter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -34,6 +56,7 @@ public class DetailActivity extends AppCompatActivity {
 
         mMovie = (Movie) getIntent().getSerializableExtra(getString(R.string.intent_extra_movie));
         mActivity = this;
+        mRetrofit = Util.setupRetrofit();
 
         if (Util.isPortrait(this))
             Util.loadImage(this, Util.TYPE_BACKDROP, ApiService.BACKDROP_SIZE_W780, mMovie.backdropPath, b.ivImage);
@@ -47,5 +70,54 @@ public class DetailActivity extends AppCompatActivity {
         b.tvReleaseDate.setText("Released " + mMovie.releaseDate);
         b.tvOverview.setText(mMovie.overview);
 
+        getTrailers(mMovie.id);
+    }
+
+    private void getTrailers(int movieid) {
+        ApiService api = mRetrofit.create(ApiService.class);
+        Call<ApiResponseTrailersList> call = api.apiGetTrailers(mMovie.id);
+        call.enqueue(new Callback<ApiResponseTrailersList>() {
+            @Override
+            public void onResponse(Call<ApiResponseTrailersList> call, retrofit2.Response<ApiResponseTrailersList> response) {
+                mTrailers = response.body().youtube;
+                for (YoutubeTrailer trailer : mTrailers) {
+                    Log.v(LOG_TAG, trailer.name + ": " + YOUTUBE_BASE_URL + trailer.source);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponseTrailersList> call, Throwable t) {
+                t.printStackTrace();
+            }
+        });
+    }
+
+    // TODO: cannot have a ListView inside a ScrollView, display trailers in some other way
+    public class TrailerAdapter extends ArrayAdapter<YoutubeTrailer> {
+        private final String LOG_TAG = TrailerAdapter.class.getSimpleName();
+
+        public TrailerAdapter(Context context, ArrayList<YoutubeTrailer> items) {
+            super(context, 0, items);
+        }
+
+        @NonNull
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            YoutubeTrailer trailer = getItem(position);
+            ItemTrailerBinding binding;
+
+            if (convertView == null) {
+                binding = DataBindingUtil.inflate(LayoutInflater.from(getContext()), R.layout.item_trailer, parent, false);
+                convertView = binding.getRoot();
+                convertView.setTag(binding);
+            }
+            else
+                binding = (ItemTrailerBinding) convertView.getTag();
+
+            binding.tvTitle.setText(trailer.name);
+            binding.tvLink.setText(YOUTUBE_BASE_URL + trailer.source);
+
+            return convertView;
+        }
     }
 }
