@@ -21,7 +21,7 @@ public interface ApiService {
     String POSTER_SIZE_W154 = "w154";  // 154x231 (WxH) 2:3
     String POSTER_SIZE_W185 = "w185";  // 185x278 (WxH) 2:3
     String POSTER_SIZE_W342 = "w342";  // 342x513 (WxH) 2:3
-    String POSTER_SIZE_W500 = "w500";  // 500X750 (WxH) 2:3
+    String POSTER_SIZE_W500 = "w500";  // 500x750 (WxH) 2:3
     String POSTER_SIZE_W780 = "w780";  // 780x1170 (WxH) 2:3
     // Backdrop size defines width of the backdrop image in px, the W:H ratio is in many cases 16:9
     String BACKDROP_SIZE_W300 = "w300";    // 300x169 (WxH) 16:9

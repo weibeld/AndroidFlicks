@@ -1,7 +1,7 @@
 package org.weibeld.flicks;
 
 import android.content.Context;
-import android.content.res.Configuration;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -13,18 +13,19 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import org.weibeld.flicks.api.ApiResponseMovieList;
 import org.weibeld.flicks.api.ApiService;
+import org.weibeld.flicks.util.Util;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,7 +41,7 @@ import retrofit2.Callback;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-import static org.weibeld.flicks.R.id.ivBackdrop;
+import static org.weibeld.flicks.R.id.ivImage;
 import static org.weibeld.flicks.R.id.ivPoster;
 import static org.weibeld.flicks.api.ApiResponseMovieList.Movie;
 
@@ -69,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
         mListView = (ListView) findViewById(R.id.lvMovies);
         mMovies = new ArrayList<>();
 
-        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        if (Util.isLandscape(mActivity)) {
             mAdapter = new MovieAdapterLandscape(this, (ArrayList<Movie>) mMovies);
         }
         else {
@@ -94,6 +95,17 @@ public class MainActivity extends AppCompatActivity {
                 android.R.color.holo_green_light,
                 android.R.color.holo_orange_light,
                 android.R.color.holo_red_light);
+
+
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // Start DetailActiviry and put
+                Intent intent = new Intent(getApplicationContext(), DetailActivity.class);
+                intent.putExtra(getString(R.string.intent_extra_movie), mMovies.get(position));
+                startActivity(intent);
+            }
+        });
 
 
 
@@ -193,17 +205,7 @@ public class MainActivity extends AppCompatActivity {
 
             viewHolder.tvTitle.setText(movie.title);
             viewHolder.tvOverview.setText(movie.overview);
-            if (movie.posterPath != null) {
-                Glide.with(mActivity)
-                        .load(ApiService.BASE_URL_IMG + ApiService.POSTER_SIZE_W154 + movie.posterPath)
-                        .placeholder(getDrawable(R.drawable.poster_placeholder_154x231))
-                        .into(viewHolder.ivPoster);
-            }
-            else
-                Glide.with(mActivity)
-                        .load(getDrawable(R.drawable.poster_none_154x231))
-                        .into(viewHolder.ivPoster);
-
+            Util.loadImage(mActivity, Util.TYPE_POSTER, ApiService.POSTER_SIZE_W185, movie.posterPath, viewHolder.ivPoster);
             return convertView;
         }
 
@@ -248,16 +250,7 @@ public class MainActivity extends AppCompatActivity {
 
             viewHolder.tvTitle.setText(movie.title);
             viewHolder.tvOverview.setText(movie.overview);
-            if (movie.posterPath != null) {
-                Glide.with(mActivity)
-                        .load(ApiService.BASE_URL_IMG + ApiService.BACKDROP_SIZE_W300 + movie.backdropPath)
-                        .placeholder(getDrawable(R.drawable.backdrop_placeholder_300x169))
-                        .into(viewHolder.ivBackdrop);
-            }
-            else
-                Glide.with(mActivity)
-                        .load(getDrawable(R.drawable.backdrop_none_300x169))
-                        .into(viewHolder.ivBackdrop);
+            Util.loadImage(mActivity, Util.TYPE_BACKDROP, ApiService.BACKDROP_SIZE_W780, movie.backdropPath, viewHolder.ivBackdrop);
 
             return convertView;
         }
@@ -266,7 +259,7 @@ public class MainActivity extends AppCompatActivity {
             ViewHolder viewHolder = new ViewHolder();
             viewHolder.tvTitle = (TextView) convertView.findViewById(R.id.tvTitle);
             viewHolder.tvOverview = (TextView) convertView.findViewById(R.id.tvOverview);
-            viewHolder.ivBackdrop = (ImageView) convertView.findViewById(ivBackdrop);
+            viewHolder.ivBackdrop = (ImageView) convertView.findViewById(ivImage);
             return viewHolder;
         }
 

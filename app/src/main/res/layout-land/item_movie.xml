@@ -8,7 +8,7 @@
     >
 
     <ImageView
-        android:id="@+id/ivBackdrop"
+        android:id="@+id/ivImage"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:adjustViewBounds="true"

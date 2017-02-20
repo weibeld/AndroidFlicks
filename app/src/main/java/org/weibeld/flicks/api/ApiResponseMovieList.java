@@ -1,5 +1,6 @@
 package org.weibeld.flicks.api;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
@@ -13,7 +14,7 @@ public class ApiResponseMovieList {
     public int totalResults;
     public Dates dates;
 
-    public static class Movie {
+    public static class Movie implements Serializable {
         public String posterPath;
         public boolean adult;
         public String overview;
