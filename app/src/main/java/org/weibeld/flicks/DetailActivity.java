@@ -37,6 +37,8 @@ public class DetailActivity extends AppCompatActivity {
     private final String LOG_TAG = DetailActivity.class.getSimpleName();
 
     private static final String YOUTUBE_BASE_URL = "https://www.youtube.com/watch?v=";
+    // YouTube Data API v3 key created on https://console.developers.google.com/apis/dashboard?project=flicks-159405&duration=PT1H
+    private static final String YOUTUBE_API_KEY = "AIzaSyBcD4Io6KKkWqI7jfmD11Uq81F6k5iFDqA";
 
     ActivityDetailBinding b;
     DetailActivity mActivity;
@@ -94,11 +96,31 @@ public class DetailActivity extends AppCompatActivity {
         });
     }
 
-    private View getTrailerView(YoutubeTrailer trailer) {
+    private View getTrailerView(final YoutubeTrailer trailer) {
         ItemTrailerBinding binding;
-        binding = DataBindingUtil.inflate(LayoutInflater.from(mActivity), R.layout.item_trailer, b.trailersContainer, false);
-        binding.tvLink.setText(YOUTUBE_BASE_URL + trailer.source);
+        //binding = DataBindingUtil.inflate(LayoutInflater.from(mActivity), R.layout.item_trailer, b.trailersContainer, false);
+        binding = ItemTrailerBinding.inflate(LayoutInflater.from(mActivity), b.trailersContainer, false);
+//        YouTubePlayerFragment youTubePlayerFragment =
+//                (YouTubePlayerFragment) getFragmentManager().findFragmentById(R.id.youtubeFragment);
+
+//        binding.player.initialize("YOUR API KEY",
+//                new YouTubePlayer.OnInitializedListener() {
+//                    @Override
+//                    public void onInitializationSuccess(YouTubePlayer.Provider provider,
+//                                                        YouTubePlayer youTubePlayer, boolean b) {
+//
+//                        // do any work here to cue video, play video, etc.
+//                        youTubePlayer.cueVideo("5xVh-7ywKpE");
+//                    }
+//                    @Override
+//                    public void onInitializationFailure(YouTubePlayer.Provider provider,
+//                                                        YouTubeInitializationResult youTubeInitializationResult) {
+//
+//                    }
+//                });
+
         binding.tvTitle.setText(trailer.name);
+        binding.tvLink.setText(YOUTUBE_BASE_URL + trailer.source);
         return binding.getRoot();
     }
 
@@ -125,7 +147,6 @@ public class DetailActivity extends AppCompatActivity {
                 binding = (ItemTrailerBinding) convertView.getTag();
 
             binding.tvTitle.setText(trailer.name);
-            binding.tvLink.setText(YOUTUBE_BASE_URL + trailer.source);
 
             return convertView;
         }

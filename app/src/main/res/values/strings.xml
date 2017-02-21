@@ -3,4 +3,5 @@
     <string name="action_dummy">Dummy</string>
     <string name="intent_extra_movie">movie</string>
     <string name="title_detail_activity">Movie Details</string>
+    <string name="title_trailers">Trailers</string>
 </resources>
