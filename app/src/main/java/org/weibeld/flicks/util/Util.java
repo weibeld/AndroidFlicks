@@ -23,6 +23,7 @@ import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -45,8 +46,11 @@ public class Util {
         // Customise Gson instance
         Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
 
-        // Customise OkHttpClient (add interceptor to append api_key parameter to every query)
-        OkHttpClient okHttpClient = new OkHttpClient.Builder().addInterceptor(new Interceptor() {
+        // Enable logging of HTTP queries
+        HttpLoggingInterceptor logInterceptor = new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC);
+
+        // Append api_key parameter to every query
+        Interceptor apiKeyInterceptor = new Interceptor() {
             @Override
             public Response intercept(Chain chain) throws IOException {
                 // Append api_key parameter to every query
@@ -55,7 +59,12 @@ public class Util {
                 request = request.newBuilder().url(url).build();
                 return chain.proceed(request);
             }
-        }).build();
+        };
+
+        OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                .addInterceptor(apiKeyInterceptor)
+                .addInterceptor(logInterceptor)
+                .build();
 
         // Create Retrofit instance
         return new Retrofit.Builder()

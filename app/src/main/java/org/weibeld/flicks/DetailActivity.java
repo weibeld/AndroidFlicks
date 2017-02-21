@@ -70,18 +70,20 @@ public class DetailActivity extends AppCompatActivity {
         b.tvReleaseDate.setText("Released " + mMovie.releaseDate);
         b.tvOverview.setText(mMovie.overview);
 
-        getTrailers(mMovie.id);
+        getTrailers();
     }
 
-    private void getTrailers(int movieid) {
+    private void getTrailers() {
         ApiService api = mRetrofit.create(ApiService.class);
         Call<ApiResponseTrailersList> call = api.apiGetTrailers(mMovie.id);
         call.enqueue(new Callback<ApiResponseTrailersList>() {
             @Override
             public void onResponse(Call<ApiResponseTrailersList> call, retrofit2.Response<ApiResponseTrailersList> response) {
                 mTrailers = response.body().youtube;
+
                 for (YoutubeTrailer trailer : mTrailers) {
-                    Log.v(LOG_TAG, trailer.name + ": " + YOUTUBE_BASE_URL + trailer.source);
+                    View trailerItem = getTrailerView(trailer);
+                    b.trailersContainer.addView(trailerItem);
                 }
             }
 
@@ -90,6 +92,14 @@ public class DetailActivity extends AppCompatActivity {
                 t.printStackTrace();
             }
         });
+    }
+
+    private View getTrailerView(YoutubeTrailer trailer) {
+        ItemTrailerBinding binding;
+        binding = DataBindingUtil.inflate(LayoutInflater.from(mActivity), R.layout.item_trailer, b.trailersContainer, false);
+        binding.tvLink.setText(YOUTUBE_BASE_URL + trailer.source);
+        binding.tvTitle.setText(trailer.name);
+        return binding.getRoot();
     }
 
     // TODO: cannot have a ListView inside a ScrollView, display trailers in some other way
