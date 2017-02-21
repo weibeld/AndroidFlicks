@@ -13,7 +13,6 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import org.weibeld.flicks.api.ApiResponseTrailersList;
 import org.weibeld.flicks.api.ApiService;
 import org.weibeld.flicks.databinding.ActivityDetailBinding;
 import org.weibeld.flicks.databinding.ItemTrailerBinding;
@@ -21,8 +20,6 @@ import org.weibeld.flicks.util.Util;
 
 import java.util.ArrayList;
 
-import retrofit2.Call;
-import retrofit2.Callback;
 import retrofit2.Retrofit;
 
 import static org.weibeld.flicks.api.ApiResponseMovieList.Movie;
@@ -72,57 +69,57 @@ public class DetailActivity extends AppCompatActivity {
         b.tvReleaseDate.setText("Released " + mMovie.releaseDate);
         b.tvOverview.setText(mMovie.overview);
 
-        getTrailers();
+        //getTrailers();
     }
 
-    private void getTrailers() {
-        ApiService api = mRetrofit.create(ApiService.class);
-        Call<ApiResponseTrailersList> call = api.apiGetTrailers(mMovie.id);
-        call.enqueue(new Callback<ApiResponseTrailersList>() {
-            @Override
-            public void onResponse(Call<ApiResponseTrailersList> call, retrofit2.Response<ApiResponseTrailersList> response) {
-                mTrailers = response.body().youtube;
-
-                for (YoutubeTrailer trailer : mTrailers) {
-                    View trailerItem = getTrailerView(trailer);
-                    b.trailersContainer.addView(trailerItem);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ApiResponseTrailersList> call, Throwable t) {
-                t.printStackTrace();
-            }
-        });
-    }
-
-    private View getTrailerView(final YoutubeTrailer trailer) {
-        ItemTrailerBinding binding;
-        //binding = DataBindingUtil.inflate(LayoutInflater.from(mActivity), R.layout.item_trailer, b.trailersContainer, false);
-        binding = ItemTrailerBinding.inflate(LayoutInflater.from(mActivity), b.trailersContainer, false);
-//        YouTubePlayerFragment youTubePlayerFragment =
-//                (YouTubePlayerFragment) getFragmentManager().findFragmentById(R.id.youtubeFragment);
-
-//        binding.player.initialize("YOUR API KEY",
-//                new YouTubePlayer.OnInitializedListener() {
-//                    @Override
-//                    public void onInitializationSuccess(YouTubePlayer.Provider provider,
-//                                                        YouTubePlayer youTubePlayer, boolean b) {
+//    private void getTrailers() {
+//        ApiService api = mRetrofit.create(ApiService.class);
+//        Call<ApiResponseTrailersList> call = api.apiGetTrailers(mMovie.id);
+//        call.enqueue(new Callback<ApiResponseTrailersList>() {
+//            @Override
+//            public void onResponse(Call<ApiResponseTrailersList> call, retrofit2.Response<ApiResponseTrailersList> response) {
+//                mTrailers = response.body().youtube;
 //
-//                        // do any work here to cue video, play video, etc.
-//                        youTubePlayer.cueVideo("5xVh-7ywKpE");
-//                    }
-//                    @Override
-//                    public void onInitializationFailure(YouTubePlayer.Provider provider,
-//                                                        YouTubeInitializationResult youTubeInitializationResult) {
+//                for (YoutubeTrailer trailer : mTrailers) {
+//                    View trailerItem = getTrailerView(trailer);
+//                    b.trailersContainer.addView(trailerItem);
+//                }
+//            }
 //
-//                    }
-//                });
+//            @Override
+//            public void onFailure(Call<ApiResponseTrailersList> call, Throwable t) {
+//                t.printStackTrace();
+//            }
+//        });
+//    }
 
-        binding.tvTitle.setText(trailer.name);
-        binding.tvLink.setText(YOUTUBE_BASE_URL + trailer.source);
-        return binding.getRoot();
-    }
+//    private View getTrailerView(final YoutubeTrailer trailer) {
+//        ItemTrailerBinding binding;
+//        //binding = DataBindingUtil.inflate(LayoutInflater.from(mActivity), R.layout.item_trailer, b.trailersContainer, false);
+//        binding = ItemTrailerBinding.inflate(LayoutInflater.from(mActivity), b.trailersContainer, false);
+////        YouTubePlayerFragment youTubePlayerFragment =
+////                (YouTubePlayerFragment) getFragmentManager().findFragmentById(R.id.youtubeFragment);
+//
+////        binding.player.initialize("YOUR API KEY",
+////                new YouTubePlayer.OnInitializedListener() {
+////                    @Override
+////                    public void onInitializationSuccess(YouTubePlayer.Provider provider,
+////                                                        YouTubePlayer youTubePlayer, boolean b) {
+////
+////                        // do any work here to cue video, play video, etc.
+////                        youTubePlayer.cueVideo("5xVh-7ywKpE");
+////                    }
+////                    @Override
+////                    public void onInitializationFailure(YouTubePlayer.Provider provider,
+////                                                        YouTubeInitializationResult youTubeInitializationResult) {
+////
+////                    }
+////                });
+//
+//        binding.tvTitle.setText(trailer.name);
+//        binding.tvLink.setText(YOUTUBE_BASE_URL + trailer.source);
+//        return binding.getRoot();
+//    }
 
     // TODO: cannot have a ListView inside a ScrollView, display trailers in some other way
     public class TrailerAdapter extends ArrayAdapter<YoutubeTrailer> {
