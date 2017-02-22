@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -116,9 +115,6 @@ public class MainActivity extends AppCompatActivity {
                 int statusCode = response.code();
                 ApiResponseMovieList body = response.body();
                 List<Movie> movies = body.results;
-                for (Movie movie : movies) {
-                    Log.v(LOG_TAG, movie.title);
-                }
                 mAdapter.addAll(movies);
                 mSwipeRefresh.setRefreshing(false);  // Remove the spinning referesh item
             }

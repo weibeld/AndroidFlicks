@@ -4,11 +4,11 @@ import android.app.Activity;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.facebook.stetho.okhttp3.StethoInterceptor;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -64,6 +64,7 @@ public class Util {
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 .addInterceptor(apiKeyInterceptor)
                 .addInterceptor(logInterceptor)
+                .addNetworkInterceptor(new StethoInterceptor())  // Enable Stetho network inspection
                 .build();
 
         // Create Retrofit instance
@@ -132,7 +133,7 @@ public class Util {
         }
         if (path != null) {
             Glide.with(a).load(ApiService.BASE_URL_IMG + size + path).placeholder(placeholder).into(imageView);
-            Log.v(LOG_TAG, ApiService.BASE_URL_IMG + size + path);
+            //Log.v(LOG_TAG, ApiService.BASE_URL_IMG + size + path);
         }
         else
             Glide.with(a).load(missing).into(imageView);
