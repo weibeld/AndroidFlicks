@@ -48,4 +48,6 @@ dependencies {
 
     testCompile 'junit:junit:4.12'
     compile files('libs/YouTubeAndroidPlayerApi.jar')
+
+    compile 'com.thedeanda:lorem:2.1'
 }

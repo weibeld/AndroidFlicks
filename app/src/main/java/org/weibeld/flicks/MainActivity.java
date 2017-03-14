@@ -16,6 +16,10 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.thedeanda.lorem.LoremIpsum;
+
 import org.weibeld.flicks.api.ApiResponseMovieList;
 import org.weibeld.flicks.api.ApiService;
 import org.weibeld.flicks.databinding.ActivityMainBinding;
@@ -24,9 +28,11 @@ import org.weibeld.flicks.util.Util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import retrofit2.Call;
 import retrofit2.Callback;
+import retrofit2.Response;
 import retrofit2.Retrofit;
 
 import static org.weibeld.flicks.api.ApiResponseMovieList.Movie;
@@ -43,6 +49,108 @@ public class MainActivity extends AppCompatActivity {
     SwipeRefreshLayout mSwipeRefresh;
     ActivityMainBinding b;
 
+    // Variables used to generate dummy movie content
+    Random mRand;
+    LoremIpsum mLorem;
+    // Dummy movie titles (from http://www.seventhsanctum.com/generate.php?Genname=bmovie)
+    final String[] DUMMY_TITLES = {
+            "Beyond Science",
+            "Child of Horror, Part I",
+            "Destiny of The Incredible Bees",
+            "Dreadful House",
+            "Evil Odyssey to Jupiter",
+            "Mission: Chaos",
+            "Monsters of Passion",
+            "Offspring of Justice",
+            "Passion Pit",
+            "Son of Chaos",
+            "The Death Breed",
+            "The Decadent Indestructible Man",
+            "The Eaters from Hell",
+            "The Luscious Destiny of the SS",
+            "The Mind Ravagers",
+            "The Radioactive Harvesters",
+            "The Secret of The Disease of Africa",
+            "The Shark-People Unbound",
+            "War of Horror Mansion",
+            "War of the Centaur",
+            "Breed Battle",
+            "Expedition to Venus",
+            "Guinnevere in Saint Louis",
+            "Heart of the Dragon",
+            "I was a teenaged Satan",
+            "King Sensuality",
+            "Love Healers",
+            "Offspring of The Licentious Bird-Women",
+            "Terror Canyon, The Final Chapter",
+            "The Alpha Women",
+            "The Atomic Dragons",
+            "The Bloodthirsty Curse of the SS",
+            "The Madness Beast, Chapter IV",
+            "The Pestilence Beasts",
+            "The Rage of Tom Thumb",
+            "The Sensational Secret of The Love of Chicago",
+            "The Tales of Mu",
+            "The Terrible Case of Gloria Roberts",
+            "Walter Turner Lives",
+            "Centaur Battle 2005",
+            "Clone Assault!",
+            "Curse of The Atomic Women, The Origin",
+            "Death Circus",
+            "Donna Miller Forever",
+            "Holiness Mansion",
+            "Innocents of Suffering",
+            "Murderous Monday",
+            "My Mom Married Jesse James",
+            "Offspring of Captain Nemo",
+            "Pilgramage to The Moon",
+            "Sensation Feast",
+            "Siege of The Damnation Creature, Part IX",
+            "The Diseased Biker",
+            "The Fascination of America, A New Beginning",
+            "The Horrible Mystery of The Terrible Scorpion-People",
+            "The Kiss of Napoleon",
+            "The Love of Santa Claus",
+            "The Piranha-Person in New York",
+            "War of The Devil",
+            "Attack of the Gigantic Ants",
+            "Brood of Disease",
+            "Festival of Lizzie Borden",
+            "Golden Victory",
+            "Hate Innocent",
+            "I Married Lizzie Borden",
+            "Invasion of the Children of Evil",
+            "Love Beach",
+            "Passion Controller",
+            "Professor Wonder",
+            "The Case of the SS",
+            "The Immortal Women",
+            "The Inhuman Men",
+            "The Legendary Alicia Davis",
+            "The Policewoman Broken",
+            "The Tales of the Gorillas",
+            "The Touch of Hitler",
+            "Wednesday of Love",
+            "Brood of Holiness",
+            "Creature of Passion",
+            "Depraved Mansion",
+            "Fate of The Atomic Kid",
+            "Kiss of Insanity",
+            "Lizzie Borden Abides",
+            "Love of Disease",
+            "Mudslide",
+            "Plague Nun",
+            "Professor Death",
+            "The Body Harvester",
+            "The Leech-Men from Heaven",
+            "The Leech-Person Unbound",
+            "The Magic of De Sade",
+            "The Mindless Alien",
+            "The Policeman from Beyond",
+            "The Soul of Xavier Anderson",
+            "The Touch of Frankenstein"
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,6 +164,10 @@ public class MainActivity extends AppCompatActivity {
         mMovies = new ArrayList<>();
         mAdapter = new MovieAdapter(this, (ArrayList<Movie>) mMovies);
         mListView.setAdapter(mAdapter);
+
+        // Initialise variables used ot generate dummy movie content
+        mLorem = LoremIpsum.getInstance();
+        mRand = new Random();
 
         // Set up "pull to refresh"
         mSwipeRefresh = (SwipeRefreshLayout) findViewById(R.id.swipeRefresh);
@@ -111,10 +223,19 @@ public class MainActivity extends AppCompatActivity {
         Call<ApiResponseMovieList> call = api.apiGetNowPlaying();
         call.enqueue(new Callback<ApiResponseMovieList>() {
             @Override
-            public void onResponse(Call<ApiResponseMovieList> call, retrofit2.Response<ApiResponseMovieList> response) {
+            public void onResponse(Call<ApiResponseMovieList> call, Response<ApiResponseMovieList> response) {
                 int statusCode = response.code();
                 ApiResponseMovieList body = response.body();
                 List<Movie> movies = body.results;
+
+                // Replace images, titles, and descriptions of the movies with dummy content
+                for (Movie movie : movies) {
+                    movie.posterPath = "https://unsplash.it/342/513?image=" + mRand.nextInt(1000);
+                    movie.backdropPath = "https://unsplash.it/780/439?image=" + mRand.nextInt(1000);
+                    movie.title = DUMMY_TITLES[mRand.nextInt(DUMMY_TITLES.length)];
+                    movie.overview = mLorem.getParagraphs(1, 1);
+                }
+
                 mAdapter.addAll(movies);
                 mSwipeRefresh.setRefreshing(false);  // Remove the spinning referesh item
             }
@@ -151,10 +272,25 @@ public class MainActivity extends AppCompatActivity {
 
             binding.tvTitle.setText(movie.title);
             binding.tvOverview.setText(movie.overview);
+
+            // Load the dummy movie poster or backdrop into the ImageView
             if (Util.isPortrait(mActivity))
-                Util.loadImage(mActivity, Util.TYPE_POSTER, ApiService.POSTER_SIZE_W185, movie.posterPath, binding.ivImage);
+                Glide.with(mActivity)
+                        .load(movie.posterPath)
+                        .placeholder(R.drawable.poster_placeholder_185x278)
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .into(binding.ivImage);
             else
-                Util.loadImage(mActivity, Util.TYPE_BACKDROP, ApiService.BACKDROP_SIZE_W780, movie.backdropPath, binding.ivImage);
+                Glide.with(mActivity)
+                        .load(movie.backdropPath)
+                        .placeholder(R.drawable.backdrop_placeholder_780x439)
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .into(binding.ivImage);
+
+//            if (Util.isPortrait(mActivity))
+//                Util.loadImage(mActivity, Util.TYPE_POSTER, ApiService.POSTER_SIZE_W185, movie.posterPath, binding.ivImage);
+//            else
+//                Util.loadImage(mActivity, Util.TYPE_BACKDROP, ApiService.BACKDROP_SIZE_W780, movie.backdropPath, binding.ivImage);
 
             return convertView;
         }

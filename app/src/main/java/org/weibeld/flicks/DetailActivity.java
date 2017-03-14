@@ -13,7 +13,9 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import org.weibeld.flicks.api.ApiService;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+
 import org.weibeld.flicks.databinding.ActivityDetailBinding;
 import org.weibeld.flicks.databinding.ItemTrailerBinding;
 import org.weibeld.flicks.util.Util;
@@ -57,10 +59,26 @@ public class DetailActivity extends AppCompatActivity {
         mActivity = this;
         mRetrofit = Util.setupRetrofit();
 
-        if (Util.isPortrait(this))
-            Util.loadImage(this, Util.TYPE_BACKDROP, ApiService.BACKDROP_SIZE_W780, mMovie.backdropPath, b.ivImage);
+        // Load the dummy movie poster or backdrop into the ImageView
+        if (Util.isPortrait(mActivity))
+            Glide.with(mActivity)
+                    .load(mMovie.backdropPath)
+                    .placeholder(R.drawable.backdrop_placeholder_780x439)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .into(b.ivImage);
         else
-            Util.loadImage(this, Util.TYPE_POSTER, ApiService.POSTER_SIZE_W342, mMovie.posterPath, b.ivImage);
+            Glide.with(mActivity)
+                    .load(mMovie.posterPath)
+                    .placeholder(R.drawable.poster_placeholder_342x513)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .into(b.ivImage);
+
+//        if (Util.isPortrait(this))
+//            Util.loadImage(this, Util.TYPE_BACKDROP, ApiService.BACKDROP_SIZE_W780, mMovie.backdropPath, b.ivImage);
+//        else
+//            Util.loadImage(this, Util.TYPE_POSTER, ApiService.POSTER_SIZE_W342, mMovie.posterPath, b.ivImage);
+
+
         b.tvTitle.setText(mMovie.title);
         float rating = (float) mMovie.voteAverage/2;
         b.ratingBar.setRating((rating));
