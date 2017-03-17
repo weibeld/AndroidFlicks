@@ -92,15 +92,12 @@ public class MainActivity extends AppCompatActivity {
         // Set up "pull to refresh"
         mSwipeRefresh = (SwipeRefreshLayout) findViewById(R.id.swipeRefresh);
         // Setup refresh listener which triggers new data loading
-        mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                // Your code to refresh the list here.
-                // Make sure you call swipeContainer.setRefreshing(false)
-                // once the network request has completed successfully.
-                mAdapter.clear();
-                getNowPlaying();
-            }
+        mSwipeRefresh.setOnRefreshListener(() -> {
+            // Your code to refresh the list here.
+            // Make sure you call swipeContainer.setRefreshing(false)
+            // once the network request has completed successfully.
+            mAdapter.clear();
+            getNowPlaying();
         });
         // Configure the refreshing colors
         mSwipeRefresh.setColorSchemeResources(android.R.color.holo_blue_bright,
@@ -109,14 +106,11 @@ public class MainActivity extends AppCompatActivity {
                 android.R.color.holo_red_light);
 
 
-        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // Start DetailActiviry and put
-                Intent intent = new Intent(getApplicationContext(), DetailActivity.class);
-                intent.putExtra(getString(R.string.intent_extra_movie), mMovies.get(position));
-                startActivity(intent);
-            }
+        mListView.setOnItemClickListener((parent, view, position, id) -> {
+            // Start DetailActiviry and put
+            Intent intent = new Intent(getApplicationContext(), DetailActivity.class);
+            intent.putExtra(getString(R.string.intent_extra_movie), mMovies.get(position));
+            startActivity(intent);
         });
 
         getNowPlaying();

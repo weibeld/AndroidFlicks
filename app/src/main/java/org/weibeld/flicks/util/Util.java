@@ -51,15 +51,12 @@ public class Util {
         HttpLoggingInterceptor logInterceptor = new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC);
 
         // Append api_key parameter to every query
-        Interceptor apiKeyInterceptor = new Interceptor() {
-            @Override
-            public Response intercept(Chain chain) throws IOException {
-                // Append api_key parameter to every query
-                Request request = chain.request();
-                HttpUrl url = request.url().newBuilder().addQueryParameter("api_key", ApiService.API_KEY).build();
-                request = request.newBuilder().url(url).build();
-                return chain.proceed(request);
-            }
+        Interceptor apiKeyInterceptor = chain -> {
+            // Append api_key parameter to every query
+            Request request = chain.request();
+            HttpUrl url = request.url().newBuilder().addQueryParameter("api_key", ApiService.API_KEY).build();
+            request = request.newBuilder().url(url).build();
+            return chain.proceed(request);
         };
 
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
