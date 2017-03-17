@@ -4,8 +4,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/action_dummy"
-        android:title="@string/action_dummy"
+        android:id="@+id/action_terms"
+        android:title="@string/action_terms"
         app:showAsAction="never">
     </item>
 

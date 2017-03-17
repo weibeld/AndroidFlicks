@@ -1,4 +1,4 @@
-package org.weibeld.flicks;
+package org.weibeld.flicks.activities;
 
 import android.content.Context;
 import android.content.Intent;
@@ -16,10 +16,16 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.weibeld.flicks.R;
 import org.weibeld.flicks.api.ApiResponseMovieList;
 import org.weibeld.flicks.api.ApiService;
 import org.weibeld.flicks.databinding.ActivityMainBinding;
 import org.weibeld.flicks.databinding.ItemMovieBinding;
+import org.weibeld.flicks.dialogs.TermsDialogFragment;
+import org.weibeld.flicks.events.TermsAcceptanceEvent;
+import org.weibeld.flicks.managers.SharedPrefManager;
 import org.weibeld.flicks.util.Util;
 
 import java.util.ArrayList;
@@ -42,13 +48,39 @@ public class MainActivity extends AppCompatActivity {
     List<Movie> mMovies;
     SwipeRefreshLayout mSwipeRefresh;
     ActivityMainBinding b;
+    SharedPrefManager mPrefMgr;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         b = DataBindingUtil.setContentView(this, R.layout.activity_main);
         setSupportActionBar(b.toolbar);
+        mPrefMgr = SharedPrefManager.getInstance(this);
 
+        if (!haveTermsBeenPreviouslyAccepted()) {
+            EventBus.getDefault().register(this);
+            TermsDialogFragment dialog = new TermsDialogFragment();
+            dialog.show(getSupportFragmentManager(), getString(R.string.tag_terms_dialog));
+        }
+        else
+            initActivity();
+    }
+
+    // Called when the user dismisses the terms of use dialog
+    @Subscribe
+    public void onTermsAcceptanceEvent(TermsAcceptanceEvent event) {
+        EventBus.getDefault().unregister(this);
+        // If the user clicked the positive button
+        if (event.isAccepted()) {
+            mPrefMgr.getPrefs().edit().putBoolean(getString(R.string.pref_terms_accepted), true).apply();
+            initActivity();
+        }
+        // If the user clicked the negative button
+        else
+            finish();
+    }
+
+    public void initActivity() {
         // Initialise member variables
         mActivity = this;
         mRetrofit = Util.setupRetrofit();
@@ -90,7 +122,6 @@ public class MainActivity extends AppCompatActivity {
         getNowPlaying();
     }
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
@@ -100,7 +131,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_dummy:
+            case R.id.action_terms:
+                startActivity(new Intent(this, TermsActivity.class));
                 return true;
         }
         return false;
@@ -124,6 +156,10 @@ public class MainActivity extends AppCompatActivity {
                 t.printStackTrace();
             }
         });
+    }
+
+    private boolean haveTermsBeenPreviouslyAccepted() {
+        return mPrefMgr.getPrefs().getBoolean(getString(R.string.pref_terms_accepted), false);
     }
 
 
@@ -159,4 +195,5 @@ public class MainActivity extends AppCompatActivity {
             return convertView;
         }
     }
+
 }

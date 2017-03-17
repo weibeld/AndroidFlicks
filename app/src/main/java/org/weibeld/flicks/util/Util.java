@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -145,6 +146,11 @@ public class Util {
 
     public static boolean isLandscape(Activity a) {
         return (a.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
+    }
+
+    public static void toggleVisibility(View v) {
+        if (v.getVisibility() == View.VISIBLE) v.setVisibility(View.GONE);
+        else v.setVisibility(View.VISIBLE);
     }
 
 }

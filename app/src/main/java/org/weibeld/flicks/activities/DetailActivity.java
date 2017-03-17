@@ -1,4 +1,4 @@
-package org.weibeld.flicks;
+package org.weibeld.flicks.activities;
 
 import android.content.Context;
 import android.databinding.DataBindingUtil;
@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import org.weibeld.flicks.R;
 import org.weibeld.flicks.api.ApiService;
 import org.weibeld.flicks.databinding.ActivityDetailBinding;
 import org.weibeld.flicks.databinding.ItemTrailerBinding;

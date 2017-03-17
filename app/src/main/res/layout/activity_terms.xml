@@ -3,11 +3,11 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
     <LinearLayout
-        android:id="@+id/activity_main"
+        android:id="@+id/activity_terms"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        tools:context="org.weibeld.flicks.activities.MainActivity">
+        tools:context="org.weibeld.flicks.activities.TermsActivity">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
@@ -18,17 +18,11 @@
             android:elevation="@dimen/toolbar_elevation"
             />
 
-        <android.support.v4.widget.SwipeRefreshLayout
-            android:id="@+id/swipeRefresh"
+        <WebView
+            android:id="@+id/webView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <ListView
-                android:id="@+id/lvMovies"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-
-        </android.support.v4.widget.SwipeRefreshLayout>
+            android:layout_height="match_parent"
+            />
 
     </LinearLayout>
 </layout>

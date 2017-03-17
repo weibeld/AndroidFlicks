@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Flicks</string>
+    <string name="intent_extra_movie">movie</string>
+    <string name="tag_terms_dialog">terms_dialog</string>
+    <string name="uri_terms">file:///android_asset/terms.html</string>
+    <string name="pref_terms_accepted">pref_terms_accepted</string>
+</resources>

@@ -1,7 +1,12 @@
 <resources>
-    <string name="app_name">Flicks</string>
-    <string name="action_dummy">Dummy</string>
-    <string name="intent_extra_movie">movie</string>
+    <string name="action_terms">Terms of Use</string>
     <string name="title_detail_activity">Movie Details</string>
     <string name="title_trailers">Trailers</string>
+    <string name="title_terms_activity">Terms of Use</string>
+    <string name="terms_dialog_title">Terms of Use</string>
+    <string name="terms_dialog_ok">Continue</string>
+    <string name="terms_dialog_cancel">Cancel</string>
+    <string name="terms_dialog_checkbox">I accept the terms of use</string>
+    <string name="terms_dialog_msg">Before you can use this app, you must accept the terms of use below.</string>
+    <string name="terms_dialog_link">Read Terms of Use</string>
 </resources>
