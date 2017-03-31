@@ -7,6 +7,6 @@
     <string name="terms_dialog_ok">Continue</string>
     <string name="terms_dialog_cancel">Cancel</string>
     <string name="terms_dialog_checkbox">I accept the terms of use</string>
-    <string name="terms_dialog_msg">Before you can use this app, you must accept the terms of use below.</string>
+    <string name="terms_dialog_msg">Before you can use this app, you must read and accept the terms of use below.</string>
     <string name="terms_dialog_link">Read Terms of Use</string>
 </resources>
