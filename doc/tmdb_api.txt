@@ -1,0 +1,87 @@
+---
+title:  TheMovieDB API
+author: Daniel Weibel
+date:   February 2017
+---
+
+The "movie" objects in the responses of the API calls:
+
+- /movie/popular
+- /movie/now_playing
+- /movie/top_rated
+- /movie/upcoming
+
+are identical.
+
+The fields of a movie object are:
+
+~~~bash
+poster_path (string or null)
+adult (boolean)
+overview (string)
+release_date (string)
+genre_ids (array[integer])
+id (integer)
+original_title (string)
+original_language (string)
+title (string)
+backdrop_path (string or null)
+popularity (number)
+vote_count (integer)
+vote_average (number)
+~~~
+
+The corresponding member variables of a Java class (e.g. for conversion betwen JSON objects and Java objects by [Gson](https://guides.codepath.com/android/Leveraging-the-Gson-Library)) are:
+
+~~~java
+String posterPath;
+boolean adult;
+String overview;
+String releaseDate;
+int[] genreIds;
+int id;
+String originalTitle;
+String originalLanguage;
+String title;
+String backdropPath;
+double popularity;
+int voteCount;
+double voteAverage;
+~~~
+
+**Note:** for a correct conversion between underscore-delimited and camel-case identifiers, the method:
+
+~~~java
+setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
+~~~
+
+must be called on the `GsonBuilder` object.
+
+***
+
+The complete response of the above API calls is an object with the following fields:
+
+~~~bash
+page (integer)
+results (array[movie])
+dates ({maximum (string) minimum (string)})
+total_pages (integer)
+total_results (integer)
+~~~
+
+The field `results` is an array of movie objects as described above.
+
+**Note:** the API calls */movie/popular* and */movie/top_rated* do not have the field `dates`.
+
+~~~java
+int page;
+List<Movie> results;
+String[] dates;
+int totalPages;
+int totalResults;
+~~~
+
+
+
+
+
